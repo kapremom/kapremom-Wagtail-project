@@ -1,13 +1,63 @@
 """Blog Listing and blog detail page."""
 from django.db import models
 from django.shortcuts import render
-from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel
+
+from wagtail.admin.edit_handlers import (
+    FieldPanel, 
+    StreamFieldPanel,
+    MultiFieldPanel,
+)
 from wagtail.core.fields import StreamField
 from wagtail.core.models import Page
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route 
+from wagtail.snippets.models import register_snippet
+
 
 from streams import blocks
+
+
+class BlogAuthor(models.Model):
+    """blog author for snippets."""
+
+    name = models.CharField(max_length=100)
+    website = models.URLField(blank=False, null=True)
+    image = models.ForeignKey(
+        "wagtailimages.Image",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=False,
+        related_name="+",
+    )
+
+    panels = [
+        MultiFieldPanel(
+            [
+                FieldPanel("name"),
+                ImageChooserPanel("image"),
+            ],
+            heading="Name and Image",
+        ),
+        MultiFieldPanel(
+            [
+                FieldPanel("website"),
+            ],
+            heading="Links"
+        )
+    ]
+
+    def __str__(self):
+        """String repr of this class."""
+        return self.name
+
+    class Meta: # noqa
+        verbose_name = "Blog Author"
+        verbose_name_plural = "Blog Authors"
+
+
+register_snippet(BlogAuthor)
+
+    
 
 
 class BlogListingPage(RoutablePageMixin, Page):
@@ -31,6 +81,7 @@ class BlogListingPage(RoutablePageMixin, Page):
         context = super().get_context(request, *args, **kwargs)
         context["posts"] = BlogDetailPage.objects.live().public()
         context["regular_context_var"] = "Hello world 123123123"
+        context["authors"] = BlogAuthor.objects.all()
         return context
 
     @route(r'^latest/$')
