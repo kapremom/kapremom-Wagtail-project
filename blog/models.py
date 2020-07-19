@@ -1,5 +1,6 @@
 """Blog Listing and blog detail page."""
 from django import forms
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db import models
 from django.shortcuts import render
 
@@ -123,7 +124,21 @@ class BlogListingPage(RoutablePageMixin, Page):
     def get_context(self, request, *args, **kwargs):
         """Adding custom stuff to our context."""
         context = super().get_context(request, *args, **kwargs)
-        context["posts"] = BlogDetailPage.objects.live().public()
+        all_posts = BlogDetailPage.objects.live().public().order_by('-first_published_at')
+        
+        paginator = Paginator(all_posts, 1) # @todo change to 5 per page
+        
+        page = request.GET.get("page")
+        try: 
+            posts = paginator.page(page)
+
+        except PageNotAnInteger:
+            posts = paginator.page(1)
+        except EmptyPage:
+            posts = paginator.page(paginator.num_pages)
+
+        context["posts"] = posts
+
         context["regular_context_var"] = "Hello world 123123123"
         context["authors"] = BlogAuthor.objects.all()
         context["categories"] = BlogCategory.objects.all()
