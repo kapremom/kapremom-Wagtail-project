@@ -25,7 +25,7 @@ INTERNAL_IPS = ("127.0.0.1", "172.17.0.1")
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": "/home/kapre/Websites/mysite/mysite/cache"
+        "LOCATION": "/home/kapre/Websites/mysite/cache"
     }
 }
 
