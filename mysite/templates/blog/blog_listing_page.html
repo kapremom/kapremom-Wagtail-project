@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load wagtailimages_tags wagtailroutablepage_tags %}
+{% load wagtailimages_tags wagtailroutablepage_tags cache %}
 
 {% block content %}
 
@@ -21,22 +21,24 @@
 
     <div class="container">
         {% for post in posts %}
-            <div class="row">
-                <div class="col-sm-3">
-                    {% image post.blog_image fill-250x250 as blog_img %}
-                    <a href="{{ post.url }}">
-                        <img src="{{ blog_img.url }}" alt="{{ blog_img.alt }}">
-                    </a>
+            {% cache 604800 post_post_preview post.id %}
+                <div class="row">
+                    <div class="col-sm-3">
+                        {% image post.blog_image fill-250x250 as blog_img %}
+                        <a href="{{ post.url }}">
+                            <img src="{{ blog_img.url }}" alt="{{ blog_img.alt }}">
+                        </a>
+                    </div>
+                    <div class="col-sm-9">
+                        <a href="{{ post.url }}">
+                            <h2>{{ post.custom_title }}</h2>
+                            {% if post.specific.subtitle %}
+                                <p>{{ post.specific.subtitle }}
+                            {% endif %}
+                        </a>
+                    </div>
                 </div>
-                <div class="col-sm-9">
-                    <a href="{{ post.url }}">
-                        <h2>{{ post.custom_title }}</h2>
-                        {% if post.specific.subtitle %}
-                            <p>{{ post.specific.subtitle }}
-                        {% endif %}
-                    </a>
-                </div>
-            </div>
+                {% endcache %}
          {% endfor %}
     </div>
 
